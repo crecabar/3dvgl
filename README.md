@@ -1,4 +1,4 @@
-3dvgl
+# Nvidia 3D Vision test  using OpenGL
 =====
 
-Description forthcoming...
+Test application for nvidia 3D vision under Linux using OpenGL.
