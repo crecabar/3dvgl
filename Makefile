@@ -16,8 +16,8 @@ LIBS = -Llib \
 	   -lusb-1.0
 
 CXX = g++
-CFLAGS = -Wall -O2 -g $(INCLUDES)
-LDFLAGS = $(LIBS) 
+CFLAGS = -Wall -O2 -g $(INCLUDES) -I/opt/X11/include
+LDFLAGS = -L/opt/x11/lib $(LIBS)
 
 all: $(OUT)
 
