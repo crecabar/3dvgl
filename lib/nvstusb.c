@@ -12,19 +12,43 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
-#include <malloc.h>
-#include <time.h>
-#include <assert.h>
 #include <math.h>
+#include <assert.h>
 #include <pthread.h>
-
+#if defined(__APPLE__)
+#include <mach/mach.h>
+#include <mach/clock.h>
+#include <malloc/malloc.h>
+#include <GL/glut.h>
+#include <GL/glext.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glx.h>
+#elif defined(__unix__)
+#include <time.h>
+#include <malloc.h>
 #include <GL/gl.h>
 #include <GL/glx.h>
 #include <GL/glxext.h>
 #include <GL/glext.h>
+#endif
 
 #include "nvstusb.h"
 #include "usb.h"
+
+void current_utc_time(struct timespec *ts) {
+#if defined(__APPLE__)
+  clock_serv_t cclock;
+  mach_timespec_t mts;
+  host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &clock);
+  clock_get_time(cclock, &mts);
+  mach_port_deallocate(mach_task_self(), cclock);
+  ts->tv_sec = mts.tv_sec;
+  ts->tv_nsec = mts.tv_nsec;
+#else
+  clock_gettime(CLOCK_REALTIME, ts);
+#endif
+}
 
 static PFNGLXGETVIDEOSYNCSGIPROC glXGetVideoSyncSGI = NULL;
 static PFNGLXWAITVIDEOSYNCSGIPROC glXWaitVideoSyncSGI = NULL;
@@ -599,7 +623,7 @@ static void nvstusb_print_refresh_rate(void)
   /* First frame */
   if(i_it == 0) {
     struct timespec s_tmp;
-    clock_gettime(CLOCK_REALTIME, &s_tmp);
+    current_utc_time(&s_tmp);
     i_first = (uint64_t)s_tmp.tv_sec*1000000+(uint64_t)s_tmp.tv_nsec/1000;
     i_last = i_first;
     f_mean = 0;
@@ -607,7 +631,7 @@ static void nvstusb_print_refresh_rate(void)
 
   } else {
     struct timespec s_tmp;
-    clock_gettime(CLOCK_REALTIME, &s_tmp);
+    current_utc_time(&s_tmp);
     uint64_t i_new = (uint64_t)s_tmp.tv_sec*1000000+(uint64_t)s_tmp.tv_nsec/1000;
     /* Update average */
     f_mean = (double)(i_new-i_first)/(i_it);

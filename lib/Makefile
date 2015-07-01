@@ -3,7 +3,7 @@ OBJ = $(SRC:.c=.o)
 OUT = libnvstusb.a
 
 CC = gcc
-CFLAGS = -O2 -g
+CFLAGS = -O2 -g -I/opt/X11/include
 
 all: $(OUT)
 
